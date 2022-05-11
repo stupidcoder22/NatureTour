@@ -1,30 +1,28 @@
 import fs from "fs";
 import path from "path";
+import { Tour } from "../Model/Tourschema";
 const __dirname = path.resolve();
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/tourdata.json`));
 
 //get all tour
 export const getAlltours = (req, res, next) => {
-  res
-    .status(200)
-    .json({ status: "success", result: tours.length, data: tours });
+  res.status(200).json({ status: "success" });
 };
 
 //specific tour by id
 export const tourbyid = (req, res) => {
-  const tourid = tours[req.params.id];
-  res.status(200).json({ status: "success", tourid });
+  res.status(200).json({ status: "success" });
 };
 
 //create tour
 export const createtour = (req, res) => {
-  const Id = tours[tours.length - 1].id + 1;
-  const newtour = Object.assign({ id: Id }, req.body);
-  tours.push(newtour);
-  fs.writeFile(`${__dirname}/tourdata.json`, JSON.stringify(tours), (err) => {
-    res.status(201).json({
-      status: "success",
-      data: { tour: newtour },
+  const { name, rating, price } = req.body;
+  const testtour = new Tour({ name, rating, price });
+  testtour
+    .save()
+    .then((doc) => {
+      console.log(doc);
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  });
 };

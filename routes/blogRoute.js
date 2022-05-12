@@ -1,8 +1,10 @@
 import express from "express";
 import {
   createtour,
+  deletetour,
   getAlltours,
   tourbyid,
+  updatetour,
 } from "../controllers/tourcontroller";
 
 const router = express.Router();
@@ -13,8 +15,8 @@ router.get("/:id", tourbyid);
 
 router.post("/", createtour);
 
-router.patch("/:id", (req, res) => {});
+router.patch("/:id", updatetour);
 
-router.delete("/:id", (req, res) => {});
+router.delete("/:id", deletetour);
 
 export default router;

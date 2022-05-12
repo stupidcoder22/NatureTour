@@ -3,8 +3,39 @@ import { Tour } from "../Model/Tourschema";
 //get all tour
 export const getAlltours = async (req, res, next) => {
   try {
-    const tour = await Tour.find();
-    res.status(200).json({ status: "success", tour });
+    //basic filtering
+    const queryObj = { ...req.query };
+    const exlude = ["page", "sort", "field", "limit", "fields"];
+    exlude.forEach((item) => delete queryObj[item]);
+
+    //Advance filtering
+    // console.log(req.query);
+    let stringquery = JSON.stringify(queryObj);
+    stringquery = stringquery.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`
+    );
+    console.log(stringquery);
+    let query = Tour.find(JSON.parse(stringquery));
+
+    //field limiting
+    if (req.query.fields) {
+      let fieldby = req.query.fields.split(",").join(" ");
+      query = query.select(fieldby);
+    } else {
+      query = query.select("-__v");
+    }
+
+    //Sorting
+    if (req.query.sort) {
+      let sortby = req.query.sort.split(",").join(" ");
+      query = query.sort(sortby);
+    } else {
+      query = query.sort("createAt");
+    }
+    const tour = await query;
+
+    res.status(200).json({ results: tour.length, status: "success", tour });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
@@ -12,7 +43,6 @@ export const getAlltours = async (req, res, next) => {
 
 //specific tour by id
 export const tourbyid = async (req, res, next) => {
-  console.log(req.params.id);
   try {
     const tour = await Tour.findById(req.params.id);
     res.status(200).json({ status: "success", tour });

@@ -15,7 +15,7 @@ export const getAlltours = async (req, res, next) => {
       /\b(gte|gt|lte|lt)\b/g,
       (match) => `$${match}`
     );
-    console.log(stringquery);
+    console.log(req.query, stringquery);
     let query = Tour.find(JSON.parse(stringquery));
 
     //field limiting
@@ -33,6 +33,15 @@ export const getAlltours = async (req, res, next) => {
     } else {
       query = query.sort("createAt");
     }
+
+    //Pagination
+    if (req.query.page) {
+      let page = req.query.page * 1;
+      let limit = req.query.limit * 1;
+      const skip = (page - 1) * limit;
+      query = query.skip(page).limit(limit);
+    }
+
     const tour = await query;
 
     res.status(200).json({ results: tour.length, status: "success", tour });
